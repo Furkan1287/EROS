@@ -1,0 +1,8 @@
+# routes.yaml - API Gateway yönlendirme kuralları
+routes:
+  - path: /api/user/
+    service: user-service
+  - path: /api/match/
+    service: match-service
+  - path: /api/chat/
+    service: chat-service
