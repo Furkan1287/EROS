@@ -34,8 +34,8 @@ func (s *UserService) CreateUser(user *model.User) error {
 	}
 
 	// Minimum profil bilgisi kontrolü
-	if user.Name == "" || user.Email == "" || user.Bio == "" {
-		return errors.New("name, email and bio are required")
+	if user.Name == "" || user.Email == "" {
+		return errors.New("name and email are required")
 	}
 
 	user.CreatedAt = time.Now()

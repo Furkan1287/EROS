@@ -52,40 +52,38 @@ func main() {
 	router := mux.NewRouter()
 
 	// Auth routes
-	router.HandleFunc("/api/auth/register", authHandler.Register).Methods("POST")
-	router.HandleFunc("/api/auth/simple-register", authHandler.SimpleRegister).Methods("POST")
-	router.HandleFunc("/api/auth/login", authHandler.Login).Methods("POST")
+	router.HandleFunc("/api/auth/register", authHandler.Register).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/auth/simple-register", authHandler.SimpleRegister).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/auth/login", authHandler.Login).Methods("POST", "OPTIONS")
 
 	// Form data routes
-	router.HandleFunc("/api/form/hobby-categories", authHandler.GetHobbyCategories).Methods("GET")
-	router.HandleFunc("/api/form/education-levels", authHandler.GetEducationLevels).Methods("GET")
-	router.HandleFunc("/api/form/job-categories", authHandler.GetJobCategories).Methods("GET")
+	router.HandleFunc("/api/form/hobby-categories", authHandler.GetHobbyCategories).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/form/education-levels", authHandler.GetEducationLevels).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/form/job-categories", authHandler.GetJobCategories).Methods("GET", "OPTIONS")
 
 	// Photo routes
-	router.HandleFunc("/api/photos/upload", photosHandler.UploadPhoto).Methods("POST")
-	router.HandleFunc("/api/photos", photosHandler.GetUserPhotos).Methods("GET")
-	router.HandleFunc("/api/photos/reorder", photosHandler.ReorderPhotos).Methods("PUT")
-	router.HandleFunc("/api/photos", photosHandler.DeletePhoto).Methods("DELETE")
+	router.HandleFunc("/api/photos/upload", photosHandler.UploadPhoto).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/photos", photosHandler.GetUserPhotos).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/photos/reorder", photosHandler.ReorderPhotos).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/api/photos", photosHandler.DeletePhoto).Methods("DELETE", "OPTIONS")
 
 	// User routes
-	router.HandleFunc("/api/users/{id}", profileHandler.GetProfile).Methods("GET")
-	router.HandleFunc("/api/users/{id}", profileHandler.UpdateProfile).Methods("PUT")
-	router.HandleFunc("/api/users/{id}", profileHandler.DeleteProfile).Methods("DELETE")
-	router.HandleFunc("/api/users/{id}/preferences", profileHandler.GetUserPreferences).Methods("GET")
-	router.HandleFunc("/api/users/{id}/preferences", profileHandler.UpdateUserPreferences).Methods("PUT")
+	router.HandleFunc("/api/users/{id}", profileHandler.GetProfile).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/users/{id}", profileHandler.UpdateProfile).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/api/users/{id}", profileHandler.DeleteProfile).Methods("DELETE", "OPTIONS")
+	router.HandleFunc("/api/users/{id}/preferences", profileHandler.GetUserPreferences).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/users/{id}/preferences", profileHandler.UpdateUserPreferences).Methods("PUT", "OPTIONS")
 
-	// CORS middleware
+	// CORS middleware (en üste, route'lardan hemen sonra)
 	router.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
 			if r.Method == "OPTIONS" {
 				w.WriteHeader(http.StatusOK)
 				return
 			}
-
 			next.ServeHTTP(w, r)
 		})
 	})

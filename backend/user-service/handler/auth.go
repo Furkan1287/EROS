@@ -169,25 +169,27 @@ func (h *AuthHandler) SimpleRegister(w http.ResponseWriter, r *http.Request) {
 
 	var req SimpleRegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Invalid request body"})
 		return
 	}
 
-	// Basit validasyonlar
 	if req.Name == "" || req.Email == "" || req.Password == "" {
-		http.Error(w, "name, email and password are required", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "name, email and password are required"})
 		return
 	}
 
 	if len(req.Password) < 6 {
-		http.Error(w, "password must be at least 6 characters", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "password must be at least 6 characters"})
 		return
 	}
 
-	// Şifre hash'leme
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		http.Error(w, "Password hashing failed", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Password hashing failed"})
 		return
 	}
 
@@ -212,13 +214,14 @@ func (h *AuthHandler) SimpleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.userService.CreateUser(user); err != nil {
-		http.Error(w, "User creation failed", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "User creation failed"})
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message": "User registered successfully",
+		"success": true,
 		"user_id": user.ID,
 	})
 }
@@ -232,23 +235,22 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	var req LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Invalid request body"})
 		return
 	}
 
 	user, err := h.userService.AuthenticateUser(req.Email, req.Password)
 	if err != nil {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": "Invalid credentials"})
 		return
 	}
 
-	// JWT token oluşturma (TODO: JWT implementasyonu)
-	token := "dummy_token_" + user.Email
-
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"token": token,
-		"user":  user,
+		"success": true,
+		"user":    user,
 	})
 }
 
